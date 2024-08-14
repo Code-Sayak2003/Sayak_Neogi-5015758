@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.example.EmployeeManagementSystem.dto.EmployeeDTO;
 
 import java.util.List;
 
@@ -45,11 +46,27 @@ import java.util.List;
 
 // Main function for implementing pagination ---------
 
+// public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+// // Paginated list of employees
+// Page<Employee> findAll(Pageable pageable);
+
+// // Paginated list of employees by department ID
+// Page<Employee> findByDepartmentId(Long departmentId, Pageable pageable);
+// }
+
+// Using Interface-Based Projection --------
+
+// public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+// // Fetch only name and email using projection
+// List<EmployeeNameAndEmailProjection> findAllProjectedBy();
+// }
+
+// Using class-based projection -------
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
-    // Paginated list of employees
-    Page<Employee> findAll(Pageable pageable);
-
-    // Paginated list of employees by department ID
-    Page<Employee> findByDepartmentId(Long departmentId, Pageable pageable);
+    // Use constructor expression for class-based projection
+    @Query("SELECT new com.example.EmployeeManagementSystem.dto.EmployeeDTO(e.name, e.email) FROM Employee e WHERE e.department.id = :departmentId")
+    List<EmployeeDTO> findEmployeesByDepartmentId(@Param("departmentId") Long departmentId);
 }

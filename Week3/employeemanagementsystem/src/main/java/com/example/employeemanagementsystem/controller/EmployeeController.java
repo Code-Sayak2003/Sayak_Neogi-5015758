@@ -72,6 +72,67 @@ import java.util.Optional;
 
 // Controller for combining pagination and sorting
 
+// @RestController
+// @RequestMapping("/api/employees")
+// public class EmployeeController {
+
+//     private final EmployeeRepository employeeRepository;
+
+//     public EmployeeController(EmployeeRepository employeeRepository) {
+//         this.employeeRepository = employeeRepository;
+//     }
+
+//     // Get a paginated and sorted list of employees
+//     @GetMapping
+//     public Page<Employee> getAllEmployees(
+//             @RequestParam(defaultValue = "0") int page,
+//             @RequestParam(defaultValue = "10") int size,
+//             @RequestParam(defaultValue = "id") String sortBy,
+//             @RequestParam(defaultValue = "asc") String sortDir) {
+
+//         // Determine sort direction
+//         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+//         // Create Pageable object with page number, size, and sort order
+//         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+//         // Return paginated and sorted employees
+//         return employeeRepository.findAll(pageable);
+//     }
+
+//     // Get a paginated and sorted list of employees by department ID
+//     @GetMapping("/department/{departmentId}")
+//     public Page<Employee> getEmployeesByDepartmentId(
+//             @PathVariable Long departmentId,
+//             @RequestParam(defaultValue = "0") int page,
+//             @RequestParam(defaultValue = "10") int size,
+//             @RequestParam(defaultValue = "id") String sortBy,
+//             @RequestParam(defaultValue = "asc") String sortDir) {
+
+//         // Determine sort direction
+//         Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+//         // Create Pageable object with page number, size, and sort order
+//         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+//         // Return paginated and sorted employees by department ID
+
+//         return employeeRepository.findByDepartmentId(departmentId, pageable);
+//     }
+// }
+
+// Controller for testing the projection --------
+
+import com.example.EmployeeManagementSystem.dto.EmployeeDTO;
+import com.example.EmployeeManagementSystem.projection.EmployeeDetailsProjection;
+import com.example.EmployeeManagementSystem.projection.EmployeeNameAndEmailProjection;
+import com.example.EmployeeManagementSystem.repository.EmployeeRepository;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {
@@ -82,40 +143,21 @@ public class EmployeeController {
         this.employeeRepository = employeeRepository;
     }
 
-    // Get a paginated and sorted list of employees
-    @GetMapping
-    public Page<Employee> getAllEmployees(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
-
-        // Determine sort direction
-        Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        // Create Pageable object with page number, size, and sort order
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        // Return paginated and sorted employees
-        return employeeRepository.findAll(pageable);
+    // Endpoint to get employee name and email using interface-based projection
+    @GetMapping("/projections/names-emails")
+    public List<EmployeeNameAndEmailProjection> getEmployeeNameAndEmail() {
+        return employeeRepository.findAllProjectedBy();
     }
 
-    // Get a paginated and sorted list of employees by department ID
-    @GetMapping("/department/{departmentId}")
-    public Page<Employee> getEmployeesByDepartmentId(
-            @PathVariable Long departmentId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir) {
+    // Endpoint to get employee details using @Value annotation
+    @GetMapping("/projections/details")
+    public List<EmployeeDetailsProjection> getEmployeeDetails() {
+        return employeeRepository.findAllProjectedWithDetailsBy();
+    }
 
-        // Determine sort direction
-        Sort.Direction direction = sortDir.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        // Create Pageable object with page number, size, and sort order
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-
-        // Return paginated and sorted employees by department ID
-        return employeeRepository.findByDepartmentId(departmentId, pageable);
+    // Endpoint to get employee DTO by department ID using class-based projection
+    @GetMapping("/dto/department/{departmentId}")
+    public List<EmployeeDTO> getEmployeeDTOByDepartment(Long departmentId) {
+        return employeeRepository.findEmployeesByDepartmentId(departmentId);
     }
 }
